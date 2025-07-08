@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"mock:1.0"},"fieldPath":"spec.template.spec.containers[?(@.name==\"mock\")].image"}]'
+  labels:
+    app: mock
+    app.kubernetes.io/component: mock
+  name: mock
+  namespace: mymock
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deployment: mock
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations: {}
+      creationTimestamp: null
+      labels:
+        deployment: mock
+    spec:
+      containers:
+        - image: quay.io/rh_ee_mmayeras/mock-flask@sha256:3f477fbb5d4ed748d93603d1fae5a1243f08ab27f2d9c96e2f222560e7de1d7b
+          imagePullPolicy: IfNotPresent
+          name: mock
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
